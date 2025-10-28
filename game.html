@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tangkap Bola!</title>
+<style>
+    body {
+        margin: 0;
+        background: linear-gradient(180deg, #00b4db, #0083b0);
+        overflow: hidden;
+        font-family: 'Poppins', sans-serif;
+        color: white;
+        user-select: none;
+    }
+
+    h1 {
+        text-align: center;
+        margin-top: 10px;
+        text-shadow: 2px 2px 4px #000;
+    }
+
+    #gameArea {
+        position: relative;
+        margin: 0 auto;
+        width: 400px;
+        height: 600px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 3px solid #fff;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    #player {
+        position: absolute;
+        bottom: 10px;
+        left: 170px;
+        width: 60px;
+        height: 20px;
+        background: #ff4757;
+        border-radius: 10px;
+        transition: left 0.1s;
+        box-shadow: 0 0 10px #ff6b81;
+    }
+
+    .ball {
+        position: absolute;
+        width: 25px;
+        height: 25px;
+        background: #f1c40f;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #f39c12;
+    }
+
+    #score {
+        text-align: center;
+        font-size: 22px;
+        margin: 5px;
+    }
+
+    #gameOver {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        font-size: 24px;
+        color: #fff;
+        display: none;
+    }
+
+    button {
+        background: #27ae60;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 18px;
+        margin-top: 10px;
+        transition: background 0.3s;
+    }
+
+    button:hover {
+        background: #2ecc71;
+    }
+</style>
+</head>
+<body>
+    <h1>🎮 Tangkap Bola!</h1>
+    <div id="score">Skor: 0</div>
+    <div id="gameArea">
+        <div id="player"></div>
+        <div id="gameOver">
+            <p>Game Over!</p>
+            <p id="finalScore"></p>
+            <button onclick="restartGame()">Main Lagi</button>
+        </div>
+    </div>
+
+<script>
+    const gameArea = document.getElementById("gameArea");
+    const player = document.getElementById("player");
+    const scoreText = document.getElementById("score");
+    const gameOverScreen = document.getElementById("gameOver");
+    const finalScore = document.getElementById("finalScore");
+
+    let score = 0;
+    let gameOver = false;
+    let playerX = 170;
+
+    // Gerakan player dengan keyboard
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft" && playerX > 0) {
+            playerX -= 30;
+        } else if (e.key === "ArrowRight" && playerX < 340) {
+            playerX += 30;
+        }
+        player.style.left = playerX + "px";
+    });
+
+    function createBall() {
+        if (gameOver) return;
+
+        const ball = document.createElement("div");
+        ball.classList.add("ball");
+        ball.style.left = Math.random() * 375 + "px";
+        ball.style.top = "0px";
+        gameArea.appendChild(ball);
+
+        let fallSpeed = 3 + Math.random() * 2;
+
+        function fall() {
+            if (gameOver) {
+                ball.remove();
+                return;
+            }
+
+            let ballY = parseFloat(ball.style.top);
+            ballY += fallSpeed;
+            ball.style.top = ballY + "px";
+
+            let ballX = parseFloat(ball.style.left);
+
+            // Deteksi tabrakan
+            if (ballY > 560 && ballY < 600 && ballX > playerX - 20 && ballX < playerX + 60) {
+                score++;
+                scoreText.textContent = "Skor: " + score;
+                ball.remove();
+                return;
+            }
+
+            // Kalau bola jatuh ke bawah
+            if (ballY > 600) {
+                endGame();
+                return;
+            }
+
+            requestAnimationFrame(fall);
+        }
+
+        requestAnimationFrame(fall);
+
+        // Buat bola berikutnya secara acak
+        setTimeout(createBall, 1000 + Math.random() * 1000);
+    }
+
+    function endGame() {
+        gameOver = true;
+        finalScore.textContent = "Skor Akhir: " + score;
+        gameOverScreen.style.display = "flex";
+    }
+
+    function restartGame() {
+        score = 0;
+        scoreText.textContent = "Skor: 0";
+        gameOver = false;
+        gameOverScreen.style.display = "none";
+        const balls = document.querySelectorAll(".ball");
+        balls.forEach(b => b.remove());
+        createBall();
+    }
+
+    // Mulai game
+    createBall();
+</script>
+</body>
+</html>
+
